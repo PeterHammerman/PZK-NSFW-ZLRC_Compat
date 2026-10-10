@@ -1,0 +1,80 @@
+VERSION = 1,
+
+option ZLRC.enableMod
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_enableMod,
+}
+
+option ZLRC.debug
+{
+    type = boolean, default = false,
+    page = ZLRC, translation = ZLRC_debug,
+}
+
+option ZLRC.stripGuard
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_stripGuard,
+}
+
+option ZLRC.npcIgnoreSubdued
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_npcIgnoreSubdued,
+}
+
+option ZLRC.npcIgnoreDragged
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_npcIgnoreDragged,
+}
+
+option ZLRC.npcSexEnabled
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_npcSexEnabled,
+}
+
+option ZLRC.npcSexMoreScenes
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_npcSexMoreScenes,
+}
+
+option ZLRC.persistCaptives
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_persistCaptives,
+}
+
+option ZLRC.showBik
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_showBik,
+}
+
+option ZLRC.excitationSource
+{
+    type = enum, numValues = 4, default = 1,
+    page = ZLRC, translation = ZLRC_excitationSource,
+    valueTranslation = ZLRC_excitationSource,
+}
+
+option ZLRC.cleanEnabled
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_cleanEnabled,
+}
+
+option ZLRC.cleanWaterCost
+{
+    type = double, min = 0.05, max = 2.0, default = 0.25,
+    page = ZLRC, translation = ZLRC_cleanWaterCost,
+}
+
+option ZLRC.noCloakAfterNpc
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_noCloakAfterNpc,
+}

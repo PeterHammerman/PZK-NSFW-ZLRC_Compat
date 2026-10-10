@@ -1,0 +1,9 @@
+name= PZK ZomboRut + ZomboLust x A-Life Compatibility
+id=PZK_ZLRC_Compat
+description=PZK compatibility patch between Project A-Life (+ Jeem extension) and ZomboLust / ZomboRut and Being Female.
+require=\ProjectALifeNPCs,\ZomboLust,\ZomboRut,\BF
+loadModAfter=\ProjectALifeNPCs,\ProjectALifeJimmy,\ZomboDesire,\ZomboLust,\ZomboRut,\BF
+versionMin=42.21.0
+icon=icon.png
+author=Peter Hammerman
+poster=preview.png
