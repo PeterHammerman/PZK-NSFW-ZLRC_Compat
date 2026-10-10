@@ -14,8 +14,6 @@ Sandbox page: **ZLRC**. Turn on `Debug logging` and look for `[ZLRC]` lines in t
 * Item 8: a Lewd-trait flat passive gain landing in the same frame as a zombie-driven gain is scaled with it.
 * Rinsing works on blood/dirt visuals only; ZomboRut cum layers live on the player, not on targets.
 
-## Install
-Copy `ZLRC_Compat` into `Zomboid/mods/`, enable after ProjectALifeNPCs, (ProjectALifeJimmy), ZomboDesire, ZomboLust, ZomboRut.
 
 ## Links to mods:
 
