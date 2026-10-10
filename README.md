@@ -4,6 +4,8 @@ Separate compatibility mod. **No code from any of the three mods is copied** (Zo
 everything hooks through global tables / events at runtime. Enable it after all of them (`loadModAfter` is set).
 Sandbox page: **ZLRC**. Turn on `Debug logging` and look for `[ZLRC]` lines in the console when reporting problems.
 
+<img width="1024" height="874" alt="obraz" src="https://github.com/user-attachments/assets/e92e6e50-04ac-4f5c-9337-60985da7ba5f" />
+
 
 ## Limits
 * **Single-player / host only.** A-Life's stance lookup (`ProjectALife.Talk.stance`) is a server API; on a pure MP client
