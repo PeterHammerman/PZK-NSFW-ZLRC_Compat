@@ -17,4 +17,12 @@ Sandbox page: **ZLRC**. Turn on `Debug logging` and look for `[ZLRC]` lines in t
 ## Install
 Copy `ZLRC_Compat` into `Zomboid/mods/`, enable after ProjectALifeNPCs, (ProjectALifeJimmy), ZomboDesire, ZomboLust, ZomboRut.
 
+## Links to mods:
 
+Minimal Health Bar system https://steamcommunity.com/sharedfiles/filedetails/?id=3775659041
+
+Zomborut https://www.loverslab.com/topic/265927-project-zomboid-zomborut-%E2%80%94-b42-nsfw-framework/
+
+ZomboLust https://www.loverslab.com/files/file/51310-project-zomboid-zombolust/
+
+Being Female https://www.loverslab.com/files/file/48296-being-female/
