@@ -28,3 +28,6 @@ Zomborut https://www.loverslab.com/topic/265927-project-zomboid-zomborut-%E2%80%
 ZomboLust https://www.loverslab.com/files/file/51310-project-zomboid-zombolust/
 
 Being Female https://www.loverslab.com/files/file/48296-being-female/
+
+
+Further development will be targeted for vanilla player model only and vanilla basis. 
