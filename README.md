@@ -1,4 +1,4 @@
-# ZLRC Compat — A-Life (+Jeem) x ZomboRut / ZomboLust x Being Female (B42.21)
+# PZK ZLRC Compat — A-Life (+Jeem) x ZomboRut / ZomboLust x Being Female (B42.21)  v 1.0
 
 Separate compatibility mod. **No code from any of the three mods is copied** (ZomboRut's license forbids derivatives);
 everything hooks through global tables / events at runtime. Enable it after all of them (`loadModAfter` is set).
@@ -14,7 +14,15 @@ Sandbox page: **ZLRC**. Turn on `Debug logging` and look for `[ZLRC]` lines in t
 * Item 8: a Lewd-trait flat passive gain landing in the same frame as a zombie-driven gain is scaled with it.
 * Rinsing works on blood/dirt visuals only; ZomboRut cum layers live on the player, not on targets.
 
-## Install
-Copy `ZLRC_Compat` into `Zomboid/mods/`, enable after ProjectALifeNPCs, (ProjectALifeJimmy), ZomboDesire, ZomboLust, ZomboRut.
 
+## Links to mods:
 
+Minimal Health Bar system https://steamcommunity.com/sharedfiles/filedetails/?id=3775659041
+
+Zombodesire https://www.loverslab.com/files/file/44539-project-zomboid-zombodesire-framework/
+
+Zomborut https://www.loverslab.com/topic/265927-project-zomboid-zomborut-%E2%80%94-b42-nsfw-framework/
+
+ZomboLust https://www.loverslab.com/files/file/51310-project-zomboid-zombolust/
+
+Being Female https://www.loverslab.com/files/file/48296-being-female/
