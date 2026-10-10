@@ -7,14 +7,20 @@ Sandbox page: **ZLRC**. Turn on `Debug logging` and look for `[ZLRC]` lines in t
 <img width="1024" height="874" alt="obraz" src="https://github.com/user-attachments/assets/e92e6e50-04ac-4f5c-9337-60985da7ba5f" />
 
 
-## Limits
-* **Single-player / host only.** A-Life's stance lookup (`ProjectALife.Talk.stance`) is a server API; on a pure MP client
-  items 1 and 5 can't tell friendly from hostile and fail safe (no strip guard stance info → NPC treated as non-hostile
-  for item 1; item 5 menu hidden).
-* Item 5 only offers what ZomboRut ships: there is no male-player Cowgirl and no F+F Doggy scene. NPC must be *friendly or allied*
-  (A-Life stance), not merely neutral. More positions: add rows to `POSITIONS` in `ZLRC_NpcSex.lua`.
-* Item 8: a Lewd-trait flat passive gain landing in the same frame as a zombie-driven gain is scaled with it.
-* Rinsing works on blood/dirt visuals only; ZomboRut cum layers live on the player, not on targets.
+## Whats adding and Limits
+* Ask for X with friendly NPCS
+* Ability to wash (desinfect) zombie corpse to not get stench
+* Bik animations from Zombolust/Zombodesire
+* Being Female integration
+* A-life NPC will not chasing over dragged & subdued body
+* Some sandbox options
+
+Woks in SP. MP not tested (I don't have possibility to do that), Male player not tested. Some additional features, polishing will come later.
+
+WIP
+- pregnancy vanilla player
+- Hostile NPC mechanics
+- Better Zombodesire integration
 
 
 ## Links to mods:
