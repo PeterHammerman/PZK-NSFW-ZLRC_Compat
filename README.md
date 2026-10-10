@@ -1,4 +1,4 @@
-# ZLRC Compat — A-Life (+Jeem) x ZomboRut / ZomboLust x Being Female (B42.21)
+# ZLRC Compat — A-Life (+Jeem) x ZomboRut / ZomboLust x Being Female (B42.21)  v 1.0
 
 Separate compatibility mod. **No code from any of the three mods is copied** (ZomboRut's license forbids derivatives);
 everything hooks through global tables / events at runtime. Enable it after all of them (`loadModAfter` is set).
