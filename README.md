@@ -23,7 +23,7 @@ ADDONS:
 
 WIP
 
-- Hostile NPC mechanics
+- Hostile NPC mechanics (press K to surrender and be on their mercy)
 - Better Zombodesire/Zombolust integration
 
 
