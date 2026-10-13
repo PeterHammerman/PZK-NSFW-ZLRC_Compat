@@ -26,7 +26,7 @@ WIP
 - Better Zombodesire/Zombolust integration
 
 
-## Links to mods:
+## Links to required mods:
 
 A-life https://steamcommunity.com/sharedfiles/filedetails/?id=3803984183
 
