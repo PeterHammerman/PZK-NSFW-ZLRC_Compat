@@ -19,6 +19,7 @@ Woks in SP. MP not tested (I don't have possibility to do that), Male player not
 
 ADDONS:
 - pregnancy vanilla player (https://github.com/PeterHammerman/PZK-BF-VanillaBodyShapes)
+- minimal Healthbar compatibility (https://github.com/PeterHammerman/PZK-NSFW-minimalHealthbarCompat)
 
 WIP
 
