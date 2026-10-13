@@ -17,10 +17,13 @@ Sandbox page: **ZLRC**. Turn on `Debug logging` and look for `[ZLRC]` lines in t
 
 Woks in SP. MP not tested (I don't have possibility to do that), Male player not tested. Some additional features, polishing will come later.
 
+ADDONS:
+- pregnancy vanilla player (https://github.com/PeterHammerman/PZK-BF-VanillaBodyShapes)
+
 WIP
-- pregnancy vanilla player
+
 - Hostile NPC mechanics
-- Better Zombodesire integration
+- Better Zombodesire/Zombolust integration
 
 
 ## Links to mods:
