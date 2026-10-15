@@ -45,5 +45,9 @@ ZomboLust https://www.loverslab.com/files/file/51310-project-zomboid-zombolust/
 
 Being Female https://www.loverslab.com/files/file/48296-being-female/
 
+## Known issues:
+- NPC's after scenes walking without pants
+- NPC can have zombie skin during scene
+- Zombolust scenes can trigger unexpected
 
 Further development will be targeted for vanilla player model only and vanilla basis. 
