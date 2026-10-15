@@ -31,6 +31,25 @@ function ZLRC.warn(fmt, ...)
     print("[ZLRC][WARN] " .. (ok and msg or tostring(fmt)))
 end
 
+local difficultyWarning = false
+function ZLRC.zomboLustDifficulty()
+    local ok, value = pcall(function()
+        if not (PZAPI and PZAPI.ModOptions) then return nil end
+        local options = PZAPI.ModOptions:getOptions("ZomboLust")
+        local option = options and options:getOption("difficulty")
+        return option and option:getValue() or nil
+    end)
+    if ok and type(value) == "number" and value == math.floor(value) and value >= 1 and value <= 3 then
+        difficultyWarning = false
+        return value
+    end
+    if not difficultyWarning then
+        difficultyWarning = true
+        ZLRC.warn("could not read ZomboLust difficulty; using Casual rules until the option is available")
+    end
+    return 1
+end
+
 -- ---------------------------------------------------------------- object helpers
 local function md(obj)
     if obj == nil then return nil end
@@ -226,6 +245,99 @@ function ZLRC.store()
     end
     ZLRC._fallbackStore = ZLRC._fallbackStore or { captives = {} }
     return ZLRC._fallbackStore
+end
+
+--- Call a method only if this object has it. Kahlua prints a full stack trace for EVERY error raised inside pcall when the game runs
+--- in debug mode, so "pcall(function() obj:maybeMissing() end)" on a hot path floods console.txt even though the error is caught.
+--- Returns the method's first result (nil when the method is missing or throws).
+function ZLRC.call(obj, name, ...)
+    if obj == nil then return nil end
+    local f = obj[name]
+    if type(f) ~= "function" then return nil end
+    local ok, r = pcall(f, obj, ...)
+    if ok then return r end
+    return nil
+end
+
+--- true when the object has that method (no call, no error)
+function ZLRC.has(obj, name)
+    return obj ~= nil and type(obj[name]) == "function"
+end
+
+-- ---------------------------------------------------------------- encounter helpers (NPC surrender / excitation encounters)
+--- Always printed (not behind the debug switch): one short line per encounter state change, so a console.txt excerpt is
+--- enough to see what happened.
+function ZLRC.info(fmt, ...)
+    local ok, msg = pcall(string.format, tostring(fmt), ...)
+    print("[ZLRC] " .. (ok and msg or tostring(fmt)))
+end
+
+--- 0..1, 1 = completely out of endurance. nil when the stat cannot be read.
+function ZLRC.exhaustion(player)
+    local ok, v = pcall(function()
+        local stat = CharacterStat and CharacterStat.ENDURANCE
+        if stat == nil then return nil end
+        local max = stat:getMaximumValue() or 1
+        if max <= 0 then return nil end
+        return 1 - (player:getStats():get(stat) / max)
+    end)
+    if ok and type(v) == "number" then return math.max(0, math.min(1, v)) end
+    return nil
+end
+
+function ZLRC.dist2d(a, b)
+    local ok, d = pcall(function()
+        local dx, dy = a:getX() - b:getX(), a:getY() - b:getY()
+        return math.sqrt(dx * dx + dy * dy)
+    end)
+    return ok and d or 999
+end
+
+local hostileCache = setmetatable({}, { __mode = "k" })
+--- ZLRC.isKnownHostile with a 1 s cache (the stance lookup reads the A-Life registry; encounter scans call it for many NPCs).
+function ZLRC.hostileNow(npc, player)
+    local now = getTimestampMs()
+    local c = hostileCache[npc]
+    if c and c.p == player and (now - c.t) < 1000 then return c.v end
+    local v = ZLRC.isKnownHostile(npc, player) == true
+    hostileCache[npc] = { t = now, v = v, p = player }
+    return v
+end
+
+--- After a scene with an NPC the player is satisfied: ZomboLust excitation back to 0 and ZomboRut's arousal released with full relief
+--- (the "satisfied" state / afterglow), then 0. Called when a forced NPC scene or a ZomboDesire NPC scene ends (sandbox npcSatisfy).
+function ZLRC.satisfy(player)
+    if player == nil or ZLRC.sv("npcSatisfy", true) ~= true then return false end
+    local done = {}
+    local ES = rawget(_G, "ZomboLust_ExcitationSystem")
+    if ES and type(ES.setExcitation) == "function" then
+        local ok, err = pcall(ES.setExcitation, player, 0)
+        if ok then done[#done + 1] = "ZomboLust excitation=0"
+        else ZLRC.log("satisfaction: ZomboLust excitation reset failed: %s", tostring(err)) end
+    end
+    local AR = rawget(_G, "ZR_Arousal")
+    if AR then
+        local zrs = ZLRC.zrScene()
+        local active = zrs and zrs._active and zrs._active[player]
+        local alreadyReleased = type(active) == "table" and active.outroFinished == true
+            and active.zrArousalHeld ~= true and active.struggleEscaped ~= true
+        if not alreadyReleased and type(AR.release) == "function" then
+            local ok, err = pcall(AR.release, player, "scene", true, false)
+            if ok then done[#done + 1] = "ZomboRut release"
+            else ZLRC.log("satisfaction: ZomboRut relief failed: %s", tostring(err)) end
+        end
+        if type(AR.applySatisfiedState) == "function" then
+            local ok, result = pcall(AR.applySatisfiedState, player)
+            if ok and result then done[#done + 1] = "ZomboRut satisfied afterglow"
+            elseif not ok then ZLRC.log("satisfaction: ZomboRut afterglow failed: %s", tostring(result)) end
+        elseif type(AR.set) == "function" then
+            local ok, err = pcall(AR.set, player, 0)
+            if not ok then ZLRC.log("satisfaction: ZomboRut arousal reset failed: %s", tostring(err)) end
+            ZLRC.log("satisfaction: ZomboRut afterglow API unavailable; reset arousal without forcing the satisfied moodle")
+        end
+    end
+    if #done > 0 then ZLRC.info("satisfied after an NPC scene: %s", table.concat(done, ", ")) end
+    return #done > 0
 end
 
 return ZLRC

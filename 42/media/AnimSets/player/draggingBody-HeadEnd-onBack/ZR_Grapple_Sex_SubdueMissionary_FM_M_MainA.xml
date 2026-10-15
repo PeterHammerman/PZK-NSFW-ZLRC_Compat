@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animNode>
+	<m_Name>ZR_Grapple_Sex_SubdueMissionary_FM_M_MainAHeadEndOnBack</m_Name>
+	<m_Priority>10</m_Priority>
+	<m_ConditionPriority>10</m_ConditionPriority>
+	<m_AnimName>Kate_SubdueMissionaryMain</m_AnimName>
+	<m_MatchingGrappledAnimNode>ZR_Grapple_Sex_SubdueMissionary_FM_F_MainAHeadOnBack</m_MatchingGrappledAnimNode>
+	<m_GrappleOffsetForward>-0.9</m_GrappleOffsetForward>
+	<m_GrappleOffsetYaw>180.0</m_GrappleOffsetYaw>
+	<m_GrapplerOffsetBehaviour>Grappler</m_GrapplerOffsetBehaviour>
+	<m_useDeferredMovement>false</m_useDeferredMovement>
+	<m_Looped>true</m_Looped>
+	<m_BlendTime>0.2</m_BlendTime>
+	<m_SpeedScale>1.0</m_SpeedScale>
+	<m_maxTorsoTwist>0.00</m_maxTorsoTwist>
+	<m_SyncTrackingEnabled>false</m_SyncTrackingEnabled>
+	<m_Conditions x_name="bIsGrappling">
+		<m_Name>bIsGrappling</m_Name>
+		<m_Type>BOOL</m_Type>
+		<m_Value>true</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="bDoContinueGrapple">
+		<m_Name>bDoContinueGrapple</m_Name>
+		<m_Type>BOOL</m_Type>
+		<m_Value>true</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="sharedGrappleType">
+		<m_Name>sharedGrappleType</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>BwdDragHead</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="$GrappledTarget.bOnFloor">
+		<m_Name>$GrappledTarget.bOnFloor</m_Name>
+		<m_Type>BOOL</m_Type>
+		<m_Value>false</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="isMoving">
+		<m_Name>isMoving</m_Name>
+		<m_Type>BOOL</m_Type>
+		<m_Value>false</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="ZR_SceneId">
+		<m_Name>ZR_SceneId</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>Sex_SubdueMissionary_FM</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="ZR_Sex_SubdueMissionary_FMMainVariant">
+		<m_Name>ZR_Sex_SubdueMissionary_FMMainVariant</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>A</m_Value>
+	</m_Conditions>
+	<m_Events x_name="FlagWhileAlive(BlockMovement)">
+		<m_EventName>FlagWhileAlive</m_EventName>
+		<m_Time>Start</m_Time>
+		<m_ParameterValue>BlockMovement</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="FlagWhileAlive(isAnimatingBackwards)">
+		<m_EventName>FlagWhileAlive</m_EventName>
+		<m_Time>Start</m_Time>
+		<m_ParameterValue>isAnimatingBackwards</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="beat1">
+		<m_EventName>PlaySound</m_EventName>
+		<m_TimePc>0.1429</m_TimePc>
+		<m_ParameterValue>ZR_ClapSoft08</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="beat2">
+		<m_EventName>PlaySound</m_EventName>
+		<m_TimePc>0.3400</m_TimePc>
+		<m_ParameterValue>ZR_ClapSoft15</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="beat3">
+		<m_EventName>PlaySound</m_EventName>
+		<m_TimePc>0.4762</m_TimePc>
+		<m_ParameterValue>ZR_ClapSoft03</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="beat4">
+		<m_EventName>PlaySound</m_EventName>
+		<m_TimePc>0.5714</m_TimePc>
+		<m_ParameterValue>ZR_ClapSoft11</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="beat5">
+		<m_EventName>PlaySound</m_EventName>
+		<m_TimePc>0.6667</m_TimePc>
+		<m_ParameterValue>ZR_ClapSoft04</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="beat6">
+		<m_EventName>PlaySound</m_EventName>
+		<m_TimePc>0.7619</m_TimePc>
+		<m_ParameterValue>ZR_ClapSoft14</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="beat7">
+		<m_EventName>PlaySound</m_EventName>
+		<m_TimePc>0.8571</m_TimePc>
+		<m_ParameterValue>ZR_ClapSoft12</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="beat8">
+		<m_EventName>PlaySound</m_EventName>
+		<m_TimePc>0.9524</m_TimePc>
+		<m_ParameterValue>ZR_ClapSoft09</m_ParameterValue>
+	</m_Events>
+	<m_Transitions>
+		<m_Target>ZR_Grapple_Sex_SubdueMissionary_FM_M_OutroAHeadEndOnBack</m_Target>
+		<m_blendInTime>0.1</m_blendInTime>
+	</m_Transitions>
+	<m_SubStateBoneWeights>
+		<boneName>Bip01_Spine1</boneName>
+	</m_SubStateBoneWeights>
+	<m_SubStateBoneWeights>
+		<boneName>Bip01_Neck</boneName>
+	</m_SubStateBoneWeights>
+	<m_SubStateBoneWeights>
+		<boneName>Bip01_BackPack</boneName>
+	</m_SubStateBoneWeights>
+	<m_SubStateBoneWeights>
+		<boneName>Bip01_Prop1</boneName>
+	</m_SubStateBoneWeights>
+	<m_SubStateBoneWeights>
+		<boneName>Bip01_Prop2</boneName>
+	</m_SubStateBoneWeights>
+	<m_SubStateBoneWeights>
+		<boneName>Bip01_Spine</boneName>
+		<weight>0.40</weight>
+		<includeDescendants>false</includeDescendants>
+	</m_SubStateBoneWeights>
+	<m_SubStateBoneWeights>
+		<boneName>Bip01</boneName>
+		<weight>0.20</weight>
+	</m_SubStateBoneWeights>
+</animNode>

@@ -14,8 +14,10 @@ local ZomboRutScene = ZLRC.ZRS      -- lazy proxy: ZomboRutScene is only reachab
 
 ZLRC._npcScene     = ZLRC._npcScene     or setmetatable({}, { __mode = "k" }) -- [player] = true, set by ZLRC_NpcSex just before launch
 ZLRC._noCloakUntil = ZLRC._noCloakUntil or setmetatable({}, { __mode = "k" }) -- [player] = ms deadline, or math.huge while running
+local chainCloakSuppressed = setmetatable({}, { __mode = "k" })
 
 local GRACE_MS    = 20000
+local CHAIN_GRACE_MS = 120000
 local CLEAN_KEEPS = 30 * 60 * 1000
 local CLEAN_RADIUS = 1.6         -- a body picked up for a scene is still within ~1-2 tiles of where it was rinsed
 local MAX_CLEAN_RECORDS = 24
@@ -76,6 +78,7 @@ local function suppress(player, active)
     if not ZLRC.enabled() or ZLRC.sv("noCloakAfterNpc", true) ~= true then return false end
     if ZLRC._npcScene[player] then return true end
     if type(active) == "table" then
+        if active.zlrcNpcScene then return true end
         if isClean(active.body) or isClean(active.liveOriginal) then return true end
         if active.liveOriginal and ZLRC.isNpc(active.liveOriginal) then return true end
     end
@@ -83,6 +86,16 @@ local function suppress(player, active)
 end
 
 local function blocked(player)
+    local encounter = ZLRC.Enc and ZLRC.Enc.sessions and ZLRC.Enc.sessions[player]
+    if encounter and encounter.kind == "surrender" then
+        chainCloakSuppressed[player] = true
+        return true
+    end
+    if chainCloakSuppressed[player] then
+        chainCloakSuppressed[player] = nil
+        ZLRC._noCloakUntil[player] = now() + CHAIN_GRACE_MS
+        return true
+    end
     local t = ZLRC._noCloakUntil[player]
     return t ~= nil and now() < t
 end
@@ -116,12 +129,24 @@ ZLRC.whenReady("ZomboRutScene cloak callbacks",
         ZomboRutScene.registerSceneStartCallback(function(player, active)
             if suppress(player, active) then
                 ZLRC._noCloakUntil[player] = math.huge
-                if type(active) == "table" then active.zlrcNoCloak = true end
+                if type(active) == "table" then
+                    active.zlrcNoCloak = true
+                    local encounter = ZLRC.Enc and ZLRC.Enc.sessions and ZLRC.Enc.sessions[player]
+                    if encounter and encounter.kind == "surrender" then
+                        active.zlrcNoCloakChain = true
+                        chainCloakSuppressed[player] = true
+                    end
+                end
             end
         end)
         ZomboRutScene.registerSceneEndCallback(function(player, active, _result)
             if type(active) == "table" and active.zlrcNoCloak then
-                ZLRC._noCloakUntil[player] = now() + GRACE_MS
+                if active.zlrcNoCloakChain then
+                    chainCloakSuppressed[player] = true
+                    ZLRC._noCloakUntil[player] = math.huge
+                else
+                    ZLRC._noCloakUntil[player] = now() + GRACE_MS
+                end
             end
         end)
     end)

@@ -1,16 +1,18 @@
 -- ZLRC_NpcSex  (item 5)
--- Friendly / allied A-Life NPC -> entry inside ZomboRut's own "ZomboRut Options" menu: "ZR: Ask for Sex" -> positions.
+-- Friendly / allied A-Life NPC -> ZomboRut's "ZR: Ask for Sex" menu.
+-- Scenes are offered only for the exact player/NPC gender pair:
+--     F+M : Holding, Standing Doggy, Spooning, Footjob, Doggy, Cowgirl
+--     M+F : Holding, Standing Doggy, Spooning, Footjob, Doggy, Missionary
+--     F+M : Missionary uses a dedicated FM scene and animation pair.
+--     F+M / M+F : Blowjob is under "More..."; F+M also has Cowgirl (variant)
+--     F+F : Cowgirl; Face sit and Reverse lotus are under "More..."
+--     M+M : no options
 --
--- The position list is built from ZomboRut's own scene registry (listLogical / getLogical / _resolveGender), for the EXACT gender
--- pair of player and NPC (no "assumed partner" fallback). Utility scenes (drag/tackle) and violent ones (punch/lunge) are skipped.
--- "Defeat"-kind scenes (facesit, blowjob, reverse lotus ...) go into a "More" sub-menu: when launched through the corpse route
--- ZomboRut itself plays them as plain sex ("defeat-as-sex mode").
---
--- ONE launch route for everything: ZomboRut's corpse pipeline on a husk. ZomboRut's live launcher needs the Bandits mod, and its
--- attacker route (playSceneFromAttacker) was tried first and abandoned: it parks the real NPC 50 tiles away (A-Life then respawns a
--- duplicate at the old spot) and copies the NPC's clothes onto the husk, which ZomboRut's scene-start strip then rips off and drops
--- as items. Here the real NPC never moves: it is held (hidden, non-colliding, zlrcBusy, ProjectALifeCorpseOf marker so A-Life's
--- Fence/Executor leave it alone), the husk is a NAKED copy of its looks, and afterwards the NPC returns to A-Life's baseline state.
+-- Two launch routes, both ZomboRut's own scene engine:
+--   "corpse": hold the NPC, spawn a husk copying its looks, and play the registered scene on that husk.
+--   "attacker": use playSceneFromAttacker(player, npc, id), which hides the NPC, copies its clothes onto a husk, then restores it.
+-- In both cases the NPC is first put on hold for A-Life (ProjectALifeCorpseOf marker + zlrcBusy), and afterwards returned to
+-- A-Life's baseline shell state.
 
 require "ZLRC/ZLRC_Core"
 require "ZLRC/ZLRC_Pick"
@@ -20,8 +22,88 @@ local ZomboRutScene = ZLRC.ZRS      -- lazy proxy: ZomboRutScene is only reachab
 ZLRC.NpcSex = ZLRC.NpcSex or {}
 local S = ZLRC.NpcSex
 S.sessions = S.sessions or setmetatable({}, { __mode = "k" })     -- [player] = session
+S.VERSION = "item11-r18"      -- ZLRC_NpcEncounter checks this: a mixed install of old/new files must be reported, not crash
 
 local function ts() return getTimestampMs() end
+
+-- Offered positions. For each, the first route that resolves for the exact gender pair wins.
+local POSITIONS = {
+    { key = "holding", fallbackLabel = "Holding", labelKey = "ContextMenu_ZR_Scene_Holding", routes = {
+        { base = "Holding_Holding_Holding", mode = "corpse" },
+    } },
+    { key = "standingDoggy", fallbackLabel = "Standing Doggy", labelKey = "ContextMenu_ZR_Scene_StandingDoggy", routes = {
+        { base = "StandingDoggy_StandingDoggy_StandingDoggy", mode = "corpse" },
+    } },
+    { key = "spooning", fallbackLabel = "Spooning", labelKey = "ContextMenu_ZR_Scene_Spooning", routes = {
+        { base = "Spooning_Spooning_Spooning", mode = "corpse" },
+    } },
+    { key = "footjob", fallbackLabel = "Footjob", labelKey = "ContextMenu_ZR_Scene_Footjob", routes = {
+        { base = "Footjob_Footjob_Footjob", mode = "corpse" },
+    } },
+    { key = "doggy", fallbackLabel = "Doggy", labelKey = "ContextMenu_ZLRC_NpcSex_Doggy", routes = {
+        { base = "Sex_SubdueDoggy", mode = "attacker", shyRough = true },
+    } },
+    { key = "cowgirl", fallbackLabel = "Cowgirl", labelKey = "ContextMenu_ZR_Scene_Cowgirl", routes = {
+        { base = "Cowgirl_Cowgirl_Cowgirl", mode = "corpse" },
+        { base = "Sex_SubdueCowgirl", mode = "attacker", shyRough = true },
+    } },
+    { key = "missionary", fallbackLabel = "Missionary", labelKey = "ContextMenu_ZLRC_NpcSex_Missionary", routes = {
+        { base = "Sex_SubdueMissionary", mode = "attacker", genders = "MF", shyRough = true },
+        { base = "Sex_SubdueMissionary_FM", mode = "attacker", genders = "FM" },
+    } },
+    { key = "blowjob", fallbackLabel = "Blowjob", labelKey = "ContextMenu_ZLRC_NpcSex_Blowjob", more = true, routes = {
+        { base = "DefeatBJ_DefeatBJ_DefeatBJ", mode = "attacker" },
+    } },
+    { key = "cowgirlVariant", fallbackLabel = "Cowgirl (variant)", labelKey = "ContextMenu_ZLRC_NpcSex_CowgirlVariant", more = true, routes = {
+        { base = "DefeatForcedCowGirl_DefeatForcedCowGirl_DefeatForcedCowGirl", mode = "attacker", genders = "FM" },
+    } },
+    { key = "faceSit", fallbackLabel = "Face sit", labelKey = "ContextMenu_ZLRC_NpcSex_FaceSit", more = true, routes = {
+        { base = "DefeatLesbianFaceSit_DefeatLesbianFaceSit_DefeatLesbianFaceSit", mode = "attacker", genders = "FF" },
+    } },
+    { key = "reverseLotus", fallbackLabel = "Reverse lotus", labelKey = "ContextMenu_ZLRC_NpcSex_ReverseLotus", more = true, routes = {
+        { base = "DefeatRevLotus_DefeatRevLotus_DefeatRevLotus", mode = "attacker", genders = "FF" },
+    } },
+}
+S.POSITIONS = POSITIONS
+
+local function registerMissionaryFM()
+    if not (ZomboRutScene and type(ZomboRutScene.register) == "function"
+        and type(ZomboRutScene._scenes) == "table") then
+        return false
+    end
+
+    local sceneId = "Sex_SubdueMissionary_FM"
+    if not ZomboRutScene._scenes[sceneId] then
+        ZomboRutScene.register(sceneId, {
+            label = "Missionary",
+            kind = "consensual",
+            duration = 17,
+            outroDuration = 5,
+            forcedOrientation = "HeadEnd_onBack",
+            soundProfile = "soft_moan",
+            pregnancyRisk = true,
+            exactGenderOnly = true,
+            chains = { A = { "Intro", "Main", "Outro" } },
+        })
+    end
+
+    local stageTicks = require "ZomboRut/ZR_StageTicks"
+    local varOffsets = require "ZomboRut/ZR_VarOffsets"
+    stageTicks[sceneId] = stageTicks[sceneId] or { intro = 300, main = 420, outro = 300, loops = 2 }
+    varOffsets[sceneId] = varOffsets[sceneId]
+        or { fwd = -0.9, yaw = 180.0, fullTicks = 1446, intros = { "A" }, outros = { "A" }, mains = {} }
+    return true
+end
+
+ZLRC.whenReady("ZomboRut FM missionary scene registration",
+    function()
+        return ZLRC.zrScene() ~= nil
+            and type(ZomboRutScene.register) == "function"
+            and type(ZomboRutScene._scenes) == "table"
+    end,
+    function()
+        registerMissionaryFM()
+    end)
 
 local function zrReady()
     return ZLRC.zrScene() ~= nil
@@ -42,73 +124,115 @@ end
 
 local function gcode(obj) return ZLRC.isFemale(obj) and "F" or "M" end
 
+local traitApiWarning = false
+local function hasZRtrait(player, trait)
+    local api = rawget(_G, "ZR_Trait")
+    if not (api and type(api.has) == "function") then
+        if not traitApiWarning then
+            traitApiWarning = true
+            ZLRC.warn("ZomboRut trait API is unavailable; Shy NPC-scene rules cannot be applied")
+        end
+        return false
+    end
+    local ok, has = pcall(api.has, player, trait)
+    if not ok then
+        ZLRC.log("could not read ZomboRut trait %s: %s", tostring(trait), tostring(has))
+        return false
+    end
+    return has == true
+end
+
+local function hasCondom(player)
+    local inventory = player and player:getInventory()
+    return inventory ~= nil and inventory:getFirstType("BF.Condom") ~= nil
+end
+
+local function markZLRCScene(active, session)
+    if type(active) ~= "table" then return end
+    active.zlrcNpcScene = true
+    active.noTrauma = true
+    active.ctx = active.ctx or {}
+    active.ctx.condomActive = session.condomActive == true
+        and active.cfg ~= nil and active.cfg.pregnancyRisk == true or nil
+end
+
 -- eligibility -----------------------------------------------------------------------------------------------------------------
 --- returns true, or false + reason (the reason is only used for debug logging)
-local function eligible(player, npc)
+local function eligible(player, npc, opts)
     if not ZLRC.isNpc(npc) or not ZLRC.alive(npc) then return false, "not a live A-Life NPC" end
     if ZLRC.isSubdued(npc) or ZLRC.isHusk(npc) then return false, "subdued/husk" end
     local d = ZLRC.md(npc)
     if d and d.zlrcBusy then return false, "busy" end
-    if gcode(player) == "M" and gcode(npc) == "M" then return false, "male+male has no scenes here" end
+    local forced = opts and opts.forced == true
+    -- forced (item 11, hostile NPC takes a surrendered player): friendliness is not required; the scene pool decides about gender pairs
+    if not forced and gcode(player) == "M" and gcode(npc) == "M" then return false, "male+male has no scenes here" end
     if npc:isOnFloor() or npc:isKnockedDown() or npc:isCrawling() then return false, "NPC is down" end
+    if forced then return true, "forced (hostile NPC takes surrendered/excited player)" end
     local friendly, why = ZLRC.friendlyOrAllied(npc, player)
     if not friendly then return false, why .. " (needs friendly or allied)" end
     return true, why
 end
 
--- scene catalog -------------------------------------------------------------------------------------------------------------------
-local SKIP_ID = { "tackle", "drag", "heldrag", "punch", "lunge", "utility" }
-
-local LABEL_FIXES = {                                   -- friendlier names for ZomboRut's "Defeat ..." and unlabeled scenes
-    DefeatBJ = "Blowjob", DefeatLesbianFaceSit = "Face sit", DefeatRevLotus = "Reverse lotus",
-    DefeatForcedCowGirl = "Cowgirl (variant)", DefeatForcedCowgirl = "Cowgirl (variant)",
-}
-
-local function prettyFromId(id)
-    local first = id:match("^([^_]+)") or id
-    if id:find("^Sex_Subdue") then first = id:gsub("^Sex_Subdue", ""):match("^([^_]+)") or first end
-    return (first:gsub("(%l)(%u)", "%1 %2"))
-end
-
-local function labelFor(id, cfg)
-    local raw = cfg and cfg.label
-    if raw and LABEL_FIXES[raw] then return LABEL_FIXES[raw] end
-    if raw then
-        local ok, U = pcall(require, "ZomboRut/ContextMenu/ZR_MenuUtil")
-        if ok and type(U) == "table" and U.sceneLabel then return U.sceneLabel(raw) end
-        return raw
-    end
-    return prettyFromId(id)
-end
-
---- { { id = concreteSceneId, label = "...", more = bool }, ... } valid for this exact player/NPC gender pair
+--- list of { id, mode, label } valid for this exact pair
 local function resolve(player, npc)
-    local out, usedLabels = {}, {}
+    registerMissionaryFM()
+    local out = {}
     local pair = gcode(player) .. gcode(npc)
-    local ids = ZomboRutScene.listLogical and ZomboRutScene.listLogical() or {}
-    for _, logical in ipairs(ids) do
-        local lower = logical:lower()
-        local skip = false
-        for _, bad in ipairs(SKIP_ID) do if lower:find(bad, 1, true) then skip = true; break end end
-        local cfg = not skip and ZomboRutScene.getLogical(logical) or nil
-        if cfg and not (cfg.debug or cfg.debugOnly or cfg.isUtility or cfg.kind == "utility") then
-            local ok, concrete = pcall(ZomboRutScene._resolveGender, player, npc, logical)
-            -- _resolveGender may "assume" a male partner for same-gender pairs; accept only an exact gender match
-            if ok and type(concrete) == "string" and concrete:sub(-2) == pair then
-                local ccfg = ZomboRutScene._scenes[concrete]
-                if ccfg and not ccfg.debugOnly then
-                    local label = labelFor(logical, cfg)
-                    if usedLabels[label] then label = label .. " (" .. (usedLabels[label] + 1) .. ")" end
-                    usedLabels[label] = (usedLabels[label] or 0) + 1
-                    out[#out + 1] = { id = concrete, label = label, more = (cfg.isDefeat == true), sort = (cfg.friendlyOnly and "0" or "1") .. label }
+    for _, pos in ipairs(POSITIONS) do
+        for _, route in ipairs(pos.routes) do
+            if route.genders == nil or route.genders == pair then
+                local usable = true
+                if route.mode == "attacker" and type(ZomboRutScene.playSceneFromAttacker) ~= "function" then usable = false end
+                if usable and route.mode == "attacker" and type(ZomboRutScene.zombieScenesBlocked) == "function"
+                   and ZomboRutScene.zombieScenesBlocked(npc) then usable = false end
+                if usable then
+                    local ok, id = pcall(ZomboRutScene._resolveGender, player, npc, route.base)
+                    -- _resolveGender may "assume" a male partner for same-gender pairs; accept only an exact gender match
+                    if ok and type(id) == "string" and id:sub(-2) == pair then
+                        local cfg = ZomboRutScene._scenes[id]
+                        local shy = hasZRtrait(player, "Innocent")
+                        if cfg and not cfg.debugOnly
+                           and not (shy and pair ~= "FF" and (cfg.isDefeat == true or route.shyRough == true)) then
+                            out[#out + 1] = {
+                                id = id,
+                                mode = route.mode,
+                                label = getTextOrNull(pos.labelKey) or pos.fallbackLabel,
+                                more = pos.more,
+                            }
+                            break
+                        end
+                    end
                 end
             end
         end
     end
-    table.sort(out, function(a, b) return a.sort < b.sort end)
     return out
 end
 S._resolve = resolve
+
+-- A-Life displacement guard ---------------------------------------------------------------------------------------------------------
+-- ZomboRut parks the NPC 50 tiles away for the scene and teleports it back afterwards. A-Life's Watchdog reads a jump of more than
+-- Watchdog.maximumStep (20) tiles between two checks as "shell_displaced": it unbinds the shell, stores the NPC and later hydrates a
+-- NEW shell (generation+1) somewhere else - while ZomboRut restores the old body as an ordinary zombie. Result seen in-game: duplicate /
+-- vanished NPCs, NPCs coming back without their clothes. Fix: right after every park/restore we tell the Watchdog the shell's new position
+-- (binding.lastPosition, the field it compares against), so no jump is ever seen.
+function S.syncWatchdog(npc)
+    if npc == nil then return false end
+    local PA = rawget(_G, "ProjectALife")
+    local W = PA and PA.Watchdog
+    if not (W and type(W.bindings) == "table") then return false end
+    local uid = ZLRC.npcUid(npc)
+    local b = uid and W.bindings[uid]
+    if type(b) ~= "table" then return false end
+    local pos
+    if type(W.adapters) == "table" and type(W.adapters.shellPosition) == "function" then
+        local ok, p = pcall(W.adapters.shellPosition, b.shell or npc)
+        if ok and type(p) == "table" then pos = p end
+    end
+    if pos == nil then pos = { x = npc:getX(), y = npc:getY(), z = npc:getZ() } end
+    b.lastPosition = pos
+    return true
+end
 
 -- hold / restore ------------------------------------------------------------------------------------------------------------------
 local function hold(npc, snap)
@@ -121,6 +245,7 @@ local function hold(npc, snap)
     pcall(function() npc:setAlpha(0.00392); npc:setTargetAlpha(0.00392) end)
     pcall(function() npc:setDoRender(false) end)
     pcall(function() npc:setCollidable(false) end)
+    pcall(function() npc:setCanWalk(false) end)
     pcall(function() npc:setUseless(true); npc:setNoTeeth(true) end)
 end
 
@@ -190,25 +315,243 @@ local function removeHusk(body)
     pcall(function() if body.removeFromWorld then body:removeFromWorld() end end)
 end
 
+local function forwardOf(character)
+    local ok, forward = pcall(function() return character:getForwardDirection() end)
+    if not ok or not forward then return nil end
+    local okX, x = pcall(function()
+        return forward.getX and forward:getX() or forward.x
+    end)
+    local okY, y = pcall(function()
+        return forward.getY and forward:getY() or forward.y
+    end)
+    if not okX or not okY or type(x) ~= "number" or type(y) ~= "number" then return nil end
+    local length = math.sqrt(x * x + y * y)
+    if length < 0.001 then return nil end
+    return { x = x / length, y = y / length }
+end
+
+local function lockForward(character, direction)
+    if not (character and direction and type(character.setForwardDirection) == "function") then return end
+    pcall(character.setForwardDirection, character, direction.x, direction.y)
+end
+
+local function addAdditionalPain(bodyPart, amount, sceneId)
+    local ok, beforeOrError = pcall(function()
+        if not bodyPart then error("body part unavailable") end
+        local before = bodyPart:getAdditionalPain() or 0
+        bodyPart:setAdditionalPain(math.min(100, before + amount))
+        if type(syncBodyPart) == "function" then
+            syncBodyPart(bodyPart, 0x00608200)
+        end
+        return before
+    end)
+    if not ok then
+        ZLRC.log("NPC chain pain failed for %s: %s", tostring(sceneId), tostring(beforeOrError))
+        return
+    end
+end
+
+local function applyChainScenePain(player, sceneId, cfg)
+    local ok, err = pcall(function()
+        local damage = player:getBodyDamage()
+        if not damage then error("player body damage unavailable") end
+        local parts = damage:getBodyParts()
+        if not parts then error("player body parts unavailable") end
+        -- A small baseline ache on every body part represents the strain from each chain scene.
+        for i = 0, parts:size() - 1 do
+            addAdditionalPain(parts:get(i), 5, sceneId)
+        end
+
+        local id = string.lower(tostring(sceneId or ""))
+        local oral = cfg and cfg.isOral == true
+            or id:find("defeatbj", 1, true) ~= nil
+            or id:find("facesit", 1, true) ~= nil
+            or id:find("revlotus", 1, true) ~= nil
+        local penetrative = not (cfg and cfg.nonPenetrative == true)
+            and (cfg and cfg.pregnancyRisk == true
+                or id:find("holding", 1, true) ~= nil
+                or id:find("doggy", 1, true) ~= nil
+                or id:find("cowgirl", 1, true) ~= nil
+                or id:find("missionary", 1, true) ~= nil
+                or id:find("spooning", 1, true) ~= nil)
+
+        if oral then
+            addAdditionalPain(damage:getBodyPart(BodyPartType.Head), 15, sceneId)
+            addAdditionalPain(damage:getBodyPart(BodyPartType.Neck), 15, sceneId)
+        elseif penetrative then
+            addAdditionalPain(damage:getBodyPart(BodyPartType.Groin), 15, sceneId)
+            addAdditionalPain(damage:getBodyPart(BodyPartType.Torso_Lower), 15, sceneId)
+        end
+
+        if type(player.addArmMuscleStrain) == "function" then
+            player:addArmMuscleStrain(3)
+        end
+        if type(player.addBackMuscleStrain) == "function" then
+            player:addBackMuscleStrain(3)
+        end
+        if type(player.addLegMuscleStrain) == "function" then
+            player:addLegMuscleStrain(3)
+        end
+        ZLRC.info("NPC chain scene %s applied body-wide muscle strain pain%s",
+            tostring(sceneId), oral and " plus head/neck pain" or (penetrative and " plus groin/lower torso pain" or ""))
+    end)
+    if not ok then
+        ZLRC.log("NPC chain scene pain failed for %s: %s", tostring(sceneId), tostring(err))
+    end
+end
+
+local function applyViciousNoCondomIntercourse(womb)
+    local amountInMilliliters = ZombRand(10, 50)
+    local amount = amountInMilliliters / 1000
+    womb:haloText({
+        text = getText("IGUI_BF_UI_Sperm") .. " " .. tostring(amountInMilliliters) .. " ml",
+        style = "good",
+    })
+    womb.amount = math.min(womb.capacity, womb.amount + amount)
+    womb.total = womb.total + amount
+    womb:publishState()
+    if not womb.pregnancyData then womb:impregnate() end
+    ZLRC.log("Being Female condom bypassed for Vicious hostile NPC chain; condom left unused")
+end
+
+local function deferChainScenePain(player, sceneId, cfg)
+    local function applyNextTick()
+        Events.OnTick.Remove(applyNextTick)
+        applyChainScenePain(player, sceneId, cfg)
+    end
+    Events.OnTick.Add(applyNextTick)
+end
+
+ZLRC.whenReady("Being Female Womb.intercourse (Vicious NPC chain condom rule)",
+    function()
+        local ok, module = pcall(require, "BF/components/Womb")
+        local womb = ok and module and module.Womb
+        return womb ~= nil and type(womb.prototype) == "table" and type(womb.prototype.intercourse) == "function"
+    end,
+    function()
+        local module = require "BF/components/Womb"
+        ZLRC.wrap(module.Womb.prototype, "intercourse", function(orig)
+            return function(womb, ...)
+                local player = womb and womb.player
+                local session = player and S.sessions[player]
+                if session and session.surrenderChain == true and session.ignoreCondom == true then
+                    local inventory = player:getInventory()
+                    if inventory and inventory:getFirstType("BF.Condom") ~= nil then
+                        return applyViciousNoCondomIntercourse(womb)
+                    end
+                end
+                return orig(womb, ...)
+            end
+        end)
+        ZLRC.info("Being Female intercourse hook installed for Vicious hostile NPC chains")
+    end)
+
+ZLRC.whenReady("Being Female condom-aware NPC womb animation",
+    function()
+        local ok, module = pcall(require, "BF/components/Player")
+        local playerClass = ok and module and module.Player
+        return playerClass ~= nil and type(playerClass.prototype) == "table"
+            and type(playerClass.prototype.hasItem) == "function"
+    end,
+    function()
+        local module = require "BF/components/Player"
+        ZLRC.wrap(module.Player.prototype, "hasItem", function(orig)
+            return function(womb, itemName, recursive)
+                local player = womb and womb.player
+                local session = player and S.sessions[player]
+                if session and itemName == "BF.Condom" then
+                    return session.condomActive == true
+                end
+                return orig(womb, itemName, recursive)
+            end
+        end)
+        ZLRC.info("Being Female womb animation now follows the NPC scene condom rule")
+    end)
+
+ZLRC.whenReady("ZomboLust trauma event isolation for NPC scenes",
+    function()
+        local desire = rawget(_G, "ZomboDesire")
+        local handlers = desire and desire.EventMarkerModules
+        return handlers ~= nil and type(handlers.ZLApplyTrauma) == "function"
+    end,
+    function()
+        local handlers = ZomboDesire.EventMarkerModules
+        ZLRC.wrap(handlers, "ZLApplyTrauma", function(orig)
+            return function(action, ...)
+                local player = action and action.character
+                if player and S.sessions[player] then
+                    ZLRC.log("suppressed ZomboLust zombie trauma event during ZLRC NPC scene")
+                    return
+                end
+                return orig(action, ...)
+            end
+        end)
+        ZLRC.info("ZomboLust zombie trauma event isolated from ZLRC NPC scenes")
+    end)
+
 -- start / finish -------------------------------------------------------------------------------------------------------------------
-function S.start(player, npc, sceneId)
+function S.start(player, npc, sceneId, mode, opts)
     if not (zrReady() and ZLRC.enabled()) then return false end
     if S.sessions[player] or inScene(player) then return false end
-    local okE, why = eligible(player, npc)
+    local okE, why = eligible(player, npc, opts)
     if not okE then ZLRC.log("NPC scene refused: %s", tostring(why)); return false end
+    local surrender = rawget(_G, "ZR_Surrender")
+    local waitingPoseCleared = opts and opts.forced == true and surrender
+        and type(surrender.setExternalSceneWaiting) == "function"
+        and surrender.setExternalSceneWaiting(player, false) == true
     local uid = ZLRC.npcUid(npc)
     local snap = { x = npc:getX(), y = npc:getY(), z = npc:getZ(), uid = uid, banditPacified = false }
 
     hold(npc, snap)
-    local body = makeHusk(player, npc)
+
+    local encounter = ZLRC.Enc and ZLRC.Enc.sessions and ZLRC.Enc.sessions[player]
+    local surrenderChain = (opts and opts.surrenderChain == true)
+        or ((opts and opts.forced == true) and encounter and encounter.kind == "surrender")
+    local ignoreCondom = surrenderChain == true and ZLRC.zomboLustDifficulty() == 3
+    local session = {
+        npc = npc,
+        snap = snap,
+        body = nil,
+        t0 = ts(),
+        forced = (opts and opts.forced == true) or nil,
+        surrenderChain = surrenderChain or nil,
+        ignoreCondom = ignoreCondom,
+        condomActive = hasCondom(player) and not ignoreCondom,
+        watchdogSyncAt = ts(),
+    }
+    S.sessions[player] = session
+
+    local body
+    if mode == "attacker" then
+        -- ZomboRut parks the NPC itself and builds the husk from the NPC's own clothing
+        ZLRC._npcScene[player] = true
+        local ok, started = pcall(ZomboRutScene.playSceneFromAttacker, player, npc, sceneId)
+        ZLRC._npcScene[player] = nil
+        if not ok or not started then
+            S.sessions[player] = nil
+            restore(npc, snap)
+            if waitingPoseCleared then surrender.setExternalSceneWaiting(player, true) end
+            ZLRC.log("playSceneFromAttacker refused (%s)", tostring(started))
+            return false
+        end
+        local act = ZomboRutScene._active and ZomboRutScene._active[player]
+        markZLRCScene(act, session)
+        S.syncWatchdog(npc)                                   -- ZomboRut just parked the NPC far away: not a "displaced shell"
+        ZLRC.log("NPC scene %s (attacker route) started with %s", tostring(sceneId), tostring(uid))
+        return true
+    end
+
+    body = makeHusk(player, npc)
     if not body then
+        S.sessions[player] = nil
         restore(npc, snap)
+        if waitingPoseCleared then surrender.setExternalSceneWaiting(player, true) end
         ZLRC.warn("could not create husk; NPC scene cancelled")
         return false
     end
 
-    ZLRC._npcScene[player] = true                              -- read by ZLRC_CloakGuard / ZLRC_Bik at scene start
-    S.sessions[player] = { npc = npc, snap = snap, body = body, t0 = ts() }
+    ZLRC._npcScene[player] = true                              -- read by ZLRC_CloakGuard at scene start
+    session.body = body
 
     local ok, started = pcall(ZomboRutScene.playSceneFromCorpse, player, body, sceneId, { launchSource = "fromLive" })
     ZLRC._npcScene[player] = nil                               -- start callbacks already ran inside the call above
@@ -216,6 +559,7 @@ function S.start(player, npc, sceneId)
         S.sessions[player] = nil
         removeHusk(body)
         restore(npc, snap)
+        if waitingPoseCleared then surrender.setExternalSceneWaiting(player, true) end
         ZLRC.log("playSceneFromCorpse refused (%s)", tostring(started))
         return false
     end
@@ -227,30 +571,104 @@ function S.start(player, npc, sceneId)
         act.liveOriginal       = npc
         act.corpseHusk         = body
         act.partnerIsBandit    = false
-        act.zlrcNpcScene       = true
+        markZLRCScene(act, session)
     end
-    ZLRC.log("NPC scene %s started with %s", tostring(sceneId), tostring(uid))
+    ZLRC.log("NPC scene %s (corpse route) started with %s", tostring(sceneId), tostring(uid))
     return true
 end
 
 local finalizeAt = setmetatable({}, { __mode = "k" })         -- [player] = ms
+
+local function restoreNearbyCollisions(s)
+    for npc in pairs(s.suppressedNpcs or {}) do
+        ZLRC.call(npc, "setCollidable", true)
+    end
+    s.suppressedNpcs = nil
+end
+
+local function isolateNearbyNpcs(player, s)
+    local cell = getCell()
+    local list = cell and cell:getZombieList()
+    if not list then return end
+    s.suppressedNpcs = s.suppressedNpcs or setmetatable({}, { __mode = "k" })
+    local nearby = setmetatable({}, { __mode = "k" })
+    local px, py, pz = player:getX(), player:getY(), player:getZ()
+    for i = 0, list:size() - 1 do
+        local npc = list:get(i)
+        if npc and npc ~= s.npc and ZLRC.isNpc(npc) and ZLRC.alive(npc) then
+            local dx, dy = npc:getX() - px, npc:getY() - py
+            if dx * dx + dy * dy <= 16 and math.abs(npc:getZ() - pz) < 1.5 then
+                nearby[npc] = true
+                if not s.suppressedNpcs[npc] and ZLRC.call(npc, "isCollidable") == true then
+                    s.suppressedNpcs[npc] = true
+                    ZLRC.call(npc, "setCollidable", false)
+                end
+            end
+        end
+    end
+    for npc in pairs(s.suppressedNpcs) do
+        if not nearby[npc] then
+            ZLRC.call(npc, "setCollidable", true)
+            s.suppressedNpcs[npc] = nil
+        end
+    end
+end
 
 local function finalize(player)
     local s = S.sessions[player]
     S.sessions[player] = nil
     finalizeAt[player] = nil
     if not s then return end
+    restoreNearbyCollisions(s)
     removeHusk(s.body)                                        -- idempotent; ZomboRut normally removed it already
     restore(s.npc, s.snap)
+    S.syncWatchdog(s.npc)
     ZLRC.log("NPC %s restored to A-Life", tostring(s.snap and s.snap.uid))
+end
+
+local function applyShyChainEffects(player)
+    if not hasZRtrait(player, "Innocent") then return end
+
+    local stats = player:getStats()
+    if stats then
+        stats:set(CharacterStat.STRESS, 1.0)
+    else
+        ZLRC.warn("could not set maximum stress after Shy hostile NPC chain: player stats unavailable")
+    end
+
+    if hasZRtrait(player, "Traumatized") then return end
+    local trauma = rawget(_G, "ZR_Trauma")
+    if not (trauma and type(trauma.add) == "function") then
+        ZLRC.warn("ZomboRut trauma API is unavailable; Shy hostile NPC chain could not apply trauma")
+        return
+    end
+    local ok, changed, before = pcall(trauma.add, player, 1, false)
+    if not ok then
+        ZLRC.warn("could not apply ZomboRut trauma after Shy hostile NPC chain: %s", tostring(changed))
+    elseif changed then
+        ZLRC.info("Shy hostile NPC chain applied ZomboRut trauma (previous level %s) and maximum stress",
+            tostring(before))
+    else
+        ZLRC.info("Shy hostile NPC chain set maximum stress; ZomboRut trauma rules suppressed a new trauma effect")
+    end
 end
 
 ZLRC.whenReady("ZomboRut end callback (NpcSex)",
     function() return ZLRC.zrScene() ~= nil and type(ZomboRutScene.registerSceneEndCallback) == "function" end,
     function()
-        ZomboRutScene.registerSceneEndCallback(function(player, active, _result)
+        ZomboRutScene.registerSceneEndCallback(function(player, active, result)
+            local ns = S.sessions[player]
+            if ns and type(active) == "table" and active.zlrcNpcScene and result == "Released"
+               and not active.struggleEscaped then
+                ZLRC.satisfy(player)
+                if ns.surrenderChain then
+                    deferChainScenePain(player, active.sceneId, active.cfg)
+                    applyShyChainEffects(player)
+                end
+            end
             if S.sessions[player] and type(active) == "table" and active.zlrcNpcScene then
                 finalizeAt[player] = ts() + 1500                -- let ZomboRut finish its own restore first
+                S.syncWatchdog(S.sessions[player].npc)          -- ZomboRut already teleported the NPC back
             end
         end)
     end)
@@ -258,17 +676,124 @@ ZLRC.whenReady("ZomboRut end callback (NpcSex)",
 Events.OnTick.Add(function()
     local now = ts()
     for player, s in pairs(S.sessions) do
+        if now - (s.watchdogSyncAt or 0) >= 500 then
+            s.watchdogSyncAt = now
+            S.syncWatchdog(s.npc)
+        end
+        local active = ZomboRutScene and ZomboRutScene._active and ZomboRutScene._active[player]
+        if type(active) == "table" then
+            markZLRCScene(active, s)
+            if now - (s.collisionScanAt or 0) >= 250 then
+                s.collisionScanAt = now
+                isolateNearbyNpcs(player, s)
+            end
+        elseif s.suppressedNpcs then
+            restoreNearbyCollisions(s)
+        end
+        if type(active) == "table" and active.zlrcNpcScene and active.anchor and active.partnerAnchor then
+            local partner = active.partnerRef
+            local lock = s.facingLock or {}
+            lock.player = lock.player or forwardOf(player)
+            lock.partner = lock.partner or (partner and forwardOf(partner))
+            if lock.player or lock.partner then s.facingLock = lock end
+            if s.facingLock then
+                if s.facingLock.player then lockForward(player, s.facingLock.player) end
+                lockForward(partner, s.facingLock.partner)
+            end
+        end
         local at = finalizeAt[player]
         if at and now >= at then
             pcall(finalize, player)
         elseif not at then
             -- safety net: scene vanished without an end callback, or NPC lost
-            local active = ZomboRutScene and ZomboRutScene._active and ZomboRutScene._active[player]
             if (now - s.t0) > 5000 and not active then pcall(finalize, player) end
             if (now - s.t0) > 300000 then pcall(finalize, player) end
         end
     end
 end)
+
+-- NPC clothes stay on the NPC (item 11) ---------------------------------------------------------------------------------------------
+-- For a zombie attacker ZomboRut strips the lower body for the scene and DROPS the clothing on the ground (and re-applies the visuals
+-- at the end). For an A-Life NPC that means walking around without trousers afterwards. The visual strip for the scene itself is kept
+-- (the NPC is hidden anyway, the husk shows it); only the dropping / removal of the real items is skipped for A-Life NPCs.
+local function keepNpcClothes() return ZLRC.enabled() and ZLRC.sv("npcKeepClothes", true) == true end
+
+ZLRC.whenReady("ZomboRutScene._dropLowerBodyVisualsAsItems (keep NPC clothes)",
+    function() return ZLRC.zrScene() ~= nil and type(ZomboRutScene._dropLowerBodyVisualsAsItems) == "function" end,
+    function()
+        ZLRC.wrap(ZLRC.zrScene(), "_dropLowerBodyVisualsAsItems", function(orig)
+            return function(attacker, ...)
+                if attacker ~= nil and keepNpcClothes() and ZLRC.isNpc(attacker) then return 0 end
+                return orig(attacker, ...)
+            end
+        end)
+    end)
+
+ZLRC.whenReady("ZomboRutScene._stripLowerBody (keep NPC clothes)",
+    function() return ZLRC.zrScene() ~= nil and type(ZomboRutScene._stripLowerBody) == "function" end,
+    function()
+        ZLRC.wrap(ZLRC.zrScene(), "_stripLowerBody", function(orig)
+            return function(attacker, ...)
+                if attacker ~= nil and keepNpcClothes() and ZLRC.isNpc(attacker) then return 0 end
+                return orig(attacker, ...)
+            end
+        end)
+    end)
+
+-- forced scenes (item 11) ----------------------------------------------------------------------------------------------------------
+-- A HOSTILE NPC takes a surrendered / excited player. Scenes come from ZomboRut's own "force" family (the Defeat* scenes it plays for
+-- zombies), launched through the same "attacker" route as above, with the NPC held for A-Life and restored afterwards.
+local DEFEAT_BASES = {      -- scene ids as ZomboRut names them; only used when ZR_API.buildPool is unavailable
+    "DefeatPunch_DefeatPunch_DefeatPunch",
+    "DefeatBJ_DefeatBJ_DefeatBJ",
+    "DefeatLunge_DefeatLunge_DefeatLunge",
+    "DefeatLesbianFaceSit_DefeatLesbianFaceSit_DefeatLesbianFaceSit",
+    "DefeatForcedCowGirl_DefeatForcedCowGirl_DefeatForcedCowGirl",
+    "DefeatRevLotus_DefeatRevLotus_DefeatRevLotus",
+}
+
+--- list of scene ids ZomboRut can play for this exact player/NPC pair as a non-friendly ("force") scene
+function S.forcedPool(player, npc)
+    local out, seen = {}, {}
+    if not zrReady() then return out end
+    if type(ZomboRutScene._sameGenderBlocked) == "function" then
+        local okB, blocked = pcall(ZomboRutScene._sameGenderBlocked, player, npc)
+        if okB and blocked == true then return out end
+    end
+    local function add(id)
+        if type(id) ~= "string" or seen[id] then return end
+        local cfg = ZomboRutScene._scenes[id]
+        if cfg == nil or cfg.debugOnly or cfg.corpseOnly or cfg.friendlyOnly or cfg.isUtility then return end
+        seen[id] = true
+        out[#out + 1] = id
+    end
+    local api = rawget(_G, "ZR_API")
+    if api and type(api.buildPool) == "function" and type(api.Family) == "table" then
+        local ok, pool = pcall(api.buildPool, player, npc, api.Family.FORCE)
+        if ok and type(pool) == "table" then for _, id in ipairs(pool) do add(id) end end
+    end
+    if #out == 0 then
+        for _, base in ipairs(DEFEAT_BASES) do
+            local ok, id = pcall(ZomboRutScene._resolveGender, player, npc, base)
+            if ok then add(id) end
+        end
+    end
+    return out
+end
+
+--- Try the pool in random order (at most 4 launches). Returns true when a scene started.
+function S.startForced(player, npc, surrenderChain)
+    local pool = S.forcedPool(player, npc)
+    for i = #pool, 2, -1 do
+        local j = ZombRand(i) + 1
+        pool[i], pool[j] = pool[j], pool[i]
+    end
+    for i = 1, math.min(4, #pool) do
+        if S.start(player, npc, pool[i], "attacker", { forced = true, surrenderChain = surrenderChain == true }) then return true, pool[i] end
+        if S.sessions[player] or inScene(player) then return false end   -- something else grabbed the player meanwhile
+    end
+    return false
+end
 
 -- context menu ---------------------------------------------------------------------------------------------------------------------
 -- Join ZomboRut's own root submenu ("ZomboRut Options"). ZomboRut builds it lazily inside its own OnFillWorldObjectContextMenu
@@ -305,6 +830,24 @@ local function diagnose(player, z, why)
         tostring(ZLRC.npcUid(z)), gcode(z), "", gcode(player), tostring(why)))
 end
 
+local function hasNearbyNpcBystander(player, target)
+    local cell = getCell()
+    local list = cell and cell:getZombieList()
+    if not list then return false end
+    local px, py, pz = player:getX(), player:getY(), player:getZ()
+    local radiusSquared = 8 * 8
+    for i = 0, list:size() - 1 do
+        local npc = list:get(i)
+        if npc ~= target and ZLRC.isNpc(npc) and ZLRC.alive(npc) then
+            local dx, dy = npc:getX() - px, npc:getY() - py
+            if dx * dx + dy * dy <= radiusSquared and math.abs(npc:getZ() - pz) < 1.5 then
+                return true
+            end
+        end
+    end
+    return false
+end
+
 local function fill(playerNum, context, worldobjects, test)
     if test or not ZLRC.enabled() or ZLRC.sv("npcSexEnabled", true) ~= true then return end
     if not (zrReady() and zrEnabled()) then return end
@@ -333,6 +876,23 @@ local function fill(playerNum, context, worldobjects, test)
         return
     end
 
+    local shyOutside = hasZRtrait(player, "Innocent") and player:isOutside()
+    local shyBystanders = hasZRtrait(player, "Innocent") and hasNearbyNpcBystander(player, npc)
+    if shyOutside or shyBystanders then
+        diagnose(player, npc, shyOutside and "Shy personality prevents consensual scenes outdoors"
+            or "Shy personality prevents consensual scenes while other NPCs are nearby")
+        local zrMenu = zrRootMenu(context, worldobjects)
+        local option = zrMenu:addOption(getText("ContextMenu_ZR_AskForSexMenu"), player, nil)
+        zrIcon(option, "AskForSex")
+        option.notAvailable = true
+        local tooltip = ISToolTip:new()
+        tooltip:initialise()
+        tooltip:setVisible(false)
+        tooltip.description = " <RED>" .. getText(shyOutside and "ContextMenu_Mast_inno" or "ContextMenu_Mast_bandi")
+        option.toolTip = tooltip
+        return
+    end
+
     local entries = resolve(player, npc)
     if #entries == 0 then
         diagnose(player, npc, "no ZomboRut scene exists for gender pair " .. gcode(player) .. "+" .. gcode(npc))
@@ -344,24 +904,19 @@ local function fill(playerNum, context, worldobjects, test)
     zrIcon(root, "AskForSex")
     local sub = ISContextMenu:getNew(context)
     zrMenu:addSubMenu(root, sub)
-
-    local more = {}
+    local moreSub
     for _, e in ipairs(entries) do
+        local id, mode = e.id, e.mode
+        local targetSub = sub
         if e.more then
-            more[#more + 1] = e
-        else
-            local id = e.id
-            sub:addOption(e.label, player, function(p) S.start(p, npc, id) end)
+            if not moreSub then
+                local moreOption = sub:addOption(getTextOrNull("ContextMenu_ZLRC_NpcSex_More") or "More...", player, nil)
+                moreSub = ISContextMenu:getNew(context)
+                sub:addSubMenu(moreOption, moreSub)
+            end
+            targetSub = moreSub
         end
-    end
-    if #more > 0 and ZLRC.sv("npcSexMoreScenes", true) == true then
-        local moreOpt = sub:addOption(getText("ContextMenu_ZLRC_More"), player, nil)
-        local moreSub = ISContextMenu:getNew(sub)
-        sub:addSubMenu(moreOpt, moreSub)
-        for _, e in ipairs(more) do
-            local id = e.id
-            moreSub:addOption(e.label, player, function(p) S.start(p, npc, id) end)
-        end
+        targetSub:addOption(e.label, player, function(p) S.start(p, npc, id, mode) end)
     end
 end
 

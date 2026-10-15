@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animNode>
+	<m_Name>ZR_Grapple_Sex_SubdueMissionary_FM_M_IntroAHeadEndOnBack</m_Name>
+	<m_Priority>11</m_Priority>
+	<m_ConditionPriority>11</m_ConditionPriority>
+	<m_AnimName>Kate_SubdueMissionaryIntro</m_AnimName>
+	<m_MatchingGrappledAnimNode>ZR_Grapple_Sex_SubdueMissionary_FM_F_IntroAHeadOnBack</m_MatchingGrappledAnimNode>
+	<m_GrappleOffsetForward>-0.9</m_GrappleOffsetForward>
+	<m_GrappleOffsetYaw>180.0</m_GrappleOffsetYaw>
+	<m_GrapplerOffsetBehaviour>Grappler</m_GrapplerOffsetBehaviour>
+	<m_useDeferredMovement>false</m_useDeferredMovement>
+	<m_Looped>false</m_Looped>
+	<m_BlendTime>0.3</m_BlendTime>
+	<m_SpeedScale>1.0</m_SpeedScale>
+	<m_maxTorsoTwist>0.00</m_maxTorsoTwist>
+	<m_SyncTrackingEnabled>false</m_SyncTrackingEnabled>
+	<m_Conditions x_name="bIsGrappling">
+		<m_Name>bIsGrappling</m_Name>
+		<m_Type>BOOL</m_Type>
+		<m_Value>true</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="bDoContinueGrapple">
+		<m_Name>bDoContinueGrapple</m_Name>
+		<m_Type>BOOL</m_Type>
+		<m_Value>true</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="sharedGrappleType">
+		<m_Name>sharedGrappleType</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>BwdDragHead</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="$GrappledTarget.bOnFloor">
+		<m_Name>$GrappledTarget.bOnFloor</m_Name>
+		<m_Type>BOOL</m_Type>
+		<m_Value>false</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="ZR_SceneId">
+		<m_Name>ZR_SceneId</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>Sex_SubdueMissionary_FM</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="ZR_IntroDone">
+		<m_Name>ZR_IntroDone</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>false</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="ZR_Sex_SubdueMissionary_FMIntroVariant">
+		<m_Name>ZR_Sex_SubdueMissionary_FMIntroVariant</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>A</m_Value>
+	</m_Conditions>
+	<m_Events x_name="ZR_IntroDone=true">
+		<m_EventName>SetVariable</m_EventName>
+		<m_Time>End</m_Time>
+		<m_ParameterValue>ZR_IntroDone=true</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="FlagWhileAlive(BlockMovement)">
+		<m_EventName>FlagWhileAlive</m_EventName>
+		<m_Time>Start</m_Time>
+		<m_ParameterValue>BlockMovement</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="beat1">
+		<m_EventName>PlaySound</m_EventName>
+		<m_TimePc>0.0529</m_TimePc>
+		<m_ParameterValue>ZR_ClapSoft09</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="beat2">
+		<m_EventName>PlaySound</m_EventName>
+		<m_TimePc>0.9837</m_TimePc>
+		<m_ParameterValue>ZR_ClapHard07</m_ParameterValue>
+	</m_Events>
+	<m_Transitions>
+		<m_Target>ZR_Grapple_Sex_SubdueMissionary_FM_M_MainAHeadEndOnBack</m_Target>
+		<m_blendInTime>0.1</m_blendInTime>
+	</m_Transitions>
+	<m_SubStateBoneWeights>
+		<boneName>Bip01_Spine1</boneName>
+	</m_SubStateBoneWeights>
+	<m_SubStateBoneWeights>
+		<boneName>Bip01_Neck</boneName>
+	</m_SubStateBoneWeights>
+	<m_SubStateBoneWeights>
+		<boneName>Bip01_BackPack</boneName>
+	</m_SubStateBoneWeights>
+	<m_SubStateBoneWeights>
+		<boneName>Bip01_Prop1</boneName>
+	</m_SubStateBoneWeights>
+	<m_SubStateBoneWeights>
+		<boneName>Bip01_Prop2</boneName>
+	</m_SubStateBoneWeights>
+	<m_SubStateBoneWeights>
+		<boneName>Bip01_Spine</boneName>
+		<weight>0.40</weight>
+		<includeDescendants>false</includeDescendants>
+	</m_SubStateBoneWeights>
+	<m_SubStateBoneWeights>
+		<boneName>Bip01</boneName>
+		<weight>0.20</weight>
+	</m_SubStateBoneWeights>
+</animNode>

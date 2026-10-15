@@ -36,12 +36,6 @@ option ZLRC.npcSexEnabled
     page = ZLRC, translation = ZLRC_npcSexEnabled,
 }
 
-option ZLRC.npcSexMoreScenes
-{
-    type = boolean, default = true,
-    page = ZLRC, translation = ZLRC_npcSexMoreScenes,
-}
-
 option ZLRC.persistCaptives
 {
     type = boolean, default = true,
@@ -77,4 +71,142 @@ option ZLRC.noCloakAfterNpc
 {
     type = boolean, default = true,
     page = ZLRC, translation = ZLRC_noCloakAfterNpc,
+}
+
+option ZLRC.npcDefeatEnabled
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_npcDefeatEnabled,
+}
+
+option ZLRC.npcDefeatExhaustion
+{
+    type = integer, min = 30, max = 100, default = 85,
+    page = ZLRC, translation = ZLRC_npcDefeatExhaustion,
+}
+
+option ZLRC.npcDefeatChance
+{
+    type = integer, min = 0, max = 100, default = 100,
+    page = ZLRC, translation = ZLRC_npcDefeatChance,
+}
+
+option ZLRC.npcEngageRadius
+{
+    type = integer, min = 2, max = 20, default = 6,
+    page = ZLRC, translation = ZLRC_npcEngageRadius,
+}
+
+option ZLRC.npcCallRadius
+{
+    type = integer, min = 5, max = 60, default = 25,
+    page = ZLRC, translation = ZLRC_npcCallRadius,
+}
+
+option ZLRC.npcJoinGiveUp
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_npcJoinGiveUp,
+}
+
+option ZLRC.npcMaxTakers
+{
+    type = integer, min = 1, max = 8, default = 8,
+    page = ZLRC, translation = ZLRC_npcMaxTakers,
+}
+
+option ZLRC.npcTriggerRange
+{
+    type = double, min = 1.0, max = 3.0, default = 1.6,
+    page = ZLRC, translation = ZLRC_npcTriggerRange,
+}
+
+option ZLRC.npcApproachTimeout
+{
+    type = integer, min = 5, max = 60, default = 25,
+    page = ZLRC, translation = ZLRC_npcApproachTimeout,
+}
+
+option ZLRC.npcShieldGiveUp
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_npcShieldGiveUp,
+}
+
+option ZLRC.npcGraceSeconds
+{
+    type = integer, min = 0, max = 500, default = 200,
+    page = ZLRC, translation = ZLRC_npcGraceSeconds,
+}
+
+option ZLRC.npcDefeatCooldown
+{
+    type = integer, min = 0, max = 600, default = 60,
+    page = ZLRC, translation = ZLRC_npcDefeatCooldown,
+}
+
+option ZLRC.npcChainGuard
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_npcChainGuard,
+}
+
+option ZLRC.lustNpcEnabled
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_lustNpcEnabled,
+}
+
+option ZLRC.lustNpcMinExcitation
+{
+    type = integer, min = 0, max = 100, default = 40,
+    page = ZLRC, translation = ZLRC_lustNpcMinExcitation,
+}
+
+option ZLRC.lustNpcChance
+{
+    type = integer, min = 0, max = 100, default = 100,
+    page = ZLRC, translation = ZLRC_lustNpcChance,
+}
+
+option ZLRC.lustNpcRadius
+{
+    type = integer, min = 2, max = 20, default = 8,
+    page = ZLRC, translation = ZLRC_lustNpcRadius,
+}
+
+option ZLRC.npcQueue
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_npcQueue,
+}
+
+option ZLRC.npcKeepClothes
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_npcKeepClothes,
+}
+
+option ZLRC.bikAutoOpen
+{
+    type = boolean, default = false,
+    page = ZLRC, translation = ZLRC_bikAutoOpen,
+}
+
+option ZLRC.npcDangerRadius
+{
+    type = integer, min = 0, max = 30, default = 10,
+    page = ZLRC, translation = ZLRC_npcDangerRadius,
+}
+
+option ZLRC.npcHoldPost
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_npcHoldPost,
+}
+
+option ZLRC.npcSatisfy
+{
+    type = boolean, default = true,
+    page = ZLRC, translation = ZLRC_npcSatisfy,
 }

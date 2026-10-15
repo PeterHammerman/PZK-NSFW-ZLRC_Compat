@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animNode>
+	<m_Name>ZR_Grapple_Sex_SubdueMissionary_FM_F_OutroAHeadOnBack</m_Name>
+	<m_ConditionPriority>10</m_ConditionPriority>
+	<m_AnimName>Bob_SubdueMissionaryOutro</m_AnimName>
+	<m_useDeferredMovement>false</m_useDeferredMovement>
+	<m_Looped>false</m_Looped>
+	<m_BlendTime>0.2</m_BlendTime>
+	<m_EarlyTransitionOut>true</m_EarlyTransitionOut>
+	<m_SpeedScale>1.0</m_SpeedScale>
+	<m_SyncTrackingEnabled>false</m_SyncTrackingEnabled>
+	<m_Conditions x_name="bBeingGrappled">
+		<m_Name>bBeingGrappled</m_Name>
+		<m_Type>BOOL</m_Type>
+		<m_Value>true</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="sharedGrappleAnimNode">
+		<m_Name>sharedGrappleAnimNode</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>$this</m_Value>
+	</m_Conditions>
+</animNode>

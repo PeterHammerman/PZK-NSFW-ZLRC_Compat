@@ -1,4 +1,4 @@
--- ZLRC_NpcIgnore  (items 2, 3, 4, and the bleed-out half of 6)
+-- ZLRC_NpcIgnore  (items 2, 3, 4, the bleed-out half of 6, and the player shield of 11)
 --
 -- Seams used (all verified in the shipped sources):
 --   * ProjectALife.TargetPolicy.canAttack(target, stamp) -> allowed, reason
@@ -9,6 +9,7 @@
 --   * ProjectALife.Health.tick(shell, data, now)       (downed NPCs bleed out and are Kill()ed after ~10 s)
 
 require "ZLRC/ZLRC_Core"
+require "ZLRC/ZLRC_Shield"
 
 local function playerDraggingCorpseNear(obj, radius)
     if obj == nil then return false end
@@ -32,13 +33,16 @@ local function protectedTarget(target)
     if target == nil or not ZLRC.enabled() then return nil end
     local d = ZLRC.md(target)
     if d and d.zlrcBusy then return "zlrc_busy_in_scene" end   -- NPC currently in a ZomboRut scene with the player
+    -- item 11: a surrendered / defeated player (give-up, encounter, scene, post-scene grace) is not attacked (ZLRC_Shield)
+    local shield = ZLRC.shieldReason and ZLRC.shieldReason(target)
+    if shield then return shield end
     if ZLRC.sv("npcIgnoreSubdued", true) == true then
         if ZLRC.isSubdued(target) then return "zlrc_subdued" end
         if ZLRC.isHusk(target)    then return "zlrc_scene_husk" end
     end
     if ZLRC.sv("npcIgnoreDragged", true) == true then
-        local ok, grapple = pcall(function() return target:isReanimatedForGrappleOnly() end)
-        if ok and grapple == true then return "zlrc_grappled_corpse" end
+        -- only zombies/corpses have this method; the player does not, and a failing pcall floods the console in debug mode
+        if ZLRC.call(target, "isReanimatedForGrappleOnly") == true then return "zlrc_grappled_corpse" end
     end
     return nil
 end
