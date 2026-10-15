@@ -23,12 +23,23 @@ Sandbox page: **ZLRC**. Turn on `Debug logging` and look for `[ZLRC]` lines in t
 
 Woks in SP. MP not tested (I don't have possibility to do that), Male player not tested - need integration fix with being female mod first. Some additional features, polishing will come later.
 
+<<<<<<< HEAD
 ## ADDONS:
 - visible pregnancy vanilla player (https://github.com/PeterHammerman/PZK-BF-VanillaBodyShapes)
 - minimal Healthbar compatibility (https://github.com/PeterHammerman/PZK-NSFW-minimalHealthbarCompat)
 
 ## WIP
 - Better Zombolust integration for traits, professions and excitation mechanics.
+=======
+ADDONS:
+- pregnancy vanilla player (https://github.com/PeterHammerman/PZK-BF-VanillaBodyShapes)
+- minimal Healthbar compatibility (https://github.com/PeterHammerman/PZK-NSFW-minimalHealthbarCompat)
+
+WIP
+
+- Hostile NPC mechanics (press K to surrender and be on their mercy)
+- Better Zombodesire/Zombolust integration
+>>>>>>> 4249d9b7dd2ffcfe25e373d52140b25ce98106a4
 
 
 ## Links to required mods:
