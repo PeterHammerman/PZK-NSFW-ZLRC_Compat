@@ -28,7 +28,7 @@ Woks in SP. MP not tested (I don't have possibility to do that), Male player not
 - minimal Healthbar compatibility (https://github.com/PeterHammerman/PZK-NSFW-minimalHealthbarCompat)
 
 ## WIP
-- Better Zombolust integration for traits, professions and excitation mechanics.
+- Better Zombolust / Zomborut integration for traits, professions and excitation mechanics.
 
 
 ## Links to required mods:
