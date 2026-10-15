@@ -13,8 +13,8 @@ Sandbox page: **ZLRC**. Turn on `Debug logging` and look for `[ZLRC]` lines in t
 * Ability to wash (desinfect) zombie corpse to not get stench
 * Bik animations from Zombolust/Zombodesire
 * Being Female integration
-* Press K near atacking hostile NPCs to offer peacefull resolution with classic roleplay (provided by Zombolust and Zomborut). Hostile surrender-chain action NPC limits based on ZomboLust difficulty (Casual: 1, Normal: up to 3, Vicious: configured maximum). After resolution you have some time to walk away. Be carful with earlier wounds before surrendering - player can still die.
-* Vicious difficulty from Zombolust: hostile NPC chains bypass Being Female condom use; Casual and Normal retain its normal condom behavior.
+* Press K near atacking hostile NPCs to offer peacefull resolution with classic roleplay (provided by Zombolust and Zomborut). Hostile surrender-chain action NPC limits based on ZomboLust difficulty (Casual: 1, Normal: up to 3, Vicious: configured maximum). After resolution you have some time to walk away.
+* Vicious difficulty: hostile NPC chains bypass Being Female condom use; Casual and Normal retain its normal condom behavior.
 * ZomboRut's Shy (`Innocent`) personality hides defeat/subdue-style Ask-for-sex options (except the existing F-F options) and shows a disabled red-tooltip option when outdoors or when another A-Life NPC is within 8 tiles. A successful hostile NPC chain uses ZomboRut's trauma system and raises stress to maximum.
 * NPC-scene womb visuals follow the scene's condom rule. ZomboLust bik videos use the existing free clips.
 * NPC Ask-for-sex supports missionary for female-player/male-NPC pairs using a dedicated FM scene registration and the existing female/male missionary animation clips.
@@ -29,16 +29,6 @@ Woks in SP. MP not tested (I don't have possibility to do that), Male player not
 
 ## WIP
 - Better Zombolust integration for traits, professions and excitation mechanics.
-
-ADDONS:
-- pregnancy vanilla player (https://github.com/PeterHammerman/PZK-BF-VanillaBodyShapes)
-- minimal Healthbar compatibility (https://github.com/PeterHammerman/PZK-NSFW-minimalHealthbarCompat)
-
-WIP
-
-- Hostile NPC mechanics (press K to surrender and be on their mercy)
-- Better Zombodesire/Zombolust integration
-
 
 
 ## Links to required mods:
